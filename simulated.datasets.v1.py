@@ -36,27 +36,17 @@ def _generate_random_interval(base_y=0., width_std=0.000001, shift_std=0.000001,
 
     return [lower, upper]
 
-def get_signal(name,X):
-    if name=='simulated.model.1':
-        x_signal = X[:, 0]*X[:,1]+X[:,2]**2-X[:,3]*X[:,6]+X[:,7]*X[:,9]-X[:,5]**2
-    elif name=='simulated.model.2':
-        x_signal = -np.sin(2*X[:,0])+X[:,1]**2+X[:,2]-np.exp(-X[:,3])
-    elif name =='simulated.model.3':
-        x_signal = X[:,0]+3*X[:,2]**2-2*np.exp(-X[:,4])
-    return x_signal
-    
 
-
-def _generate_data(name,func, n_examples, n_features, interval_width_std, interval_shift_std,
+def _generate_data(func, n_examples, n_features, interval_width_std, interval_shift_std,
                    open_interval_proba, x_min=0, x_max=10, random_state=None):
 
     if random_state is None:
         random_state = np.random.RandomState()
 
     X = random_state.uniform(low=x_min, high=x_max, size=(n_examples, n_features))
-    x_signal = get_signal(name,X)
+    x_signal = X
 
-    base_y = np.array([func(xi) for xi in x_signal])
+    base_y = func(x_signal)
     y = np.vstack((_generate_random_interval(base_y=yi,
                                              width_std=interval_width_std,
                                              shift_std=interval_shift_std,
@@ -111,8 +101,11 @@ def generate_function_datasets(datasets, random_seed=42):
         save_dataset(X, y, plot, n_folds=5, name=name)
 
 
-if __name__ == "__main__":
-    datasets = {"simulated.model.1": lambda x: x,
-                "simulated.model.2": lambda x: x,
-                "simulated.model.3": lambda x: x}
+if __name__ == "__main__":                                                                                                                                  
+    datasets = {"simulated.sin": lambda X: np.sin(X[:,0]),                                                                                                  
+                "simulated.abs": lambda X: np.abs(X[:,0] - 5.),                                                                                             
+                "simulated.linear": lambda X: X[:,0] / 5,                                                                                                   
+                "simulated.model.1": lambda X: X[:,0] * X[:,1] + X[:,2]**2 - X[:,3] * X[:,6] + X[:,7] * X[:,9] - X[:,5]**2,                                 
+                "simulated.model.2": lambda X: -np.sin(2 * X[:,0]) + X[:,1]**2 + X[:,2] - np.exp(-X[:,3]),                                                  
+                "simulated.model.3": lambda X: X[:,0] + 3 * X[:,2]**2 - 2 * np.exp(-X[:,4])}
     generate_function_datasets(datasets, random_seed=4)
